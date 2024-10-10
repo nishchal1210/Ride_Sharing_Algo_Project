@@ -1,0 +1,87 @@
+#include <iostream>
+using namespace std ;
+#define INT_MAX 1e9 
+
+int findminvertex(int* distance ,bool* visited , int n){
+  // initilizing with -1 ;
+    int min_vertex = -1 ;
+    for(int i =0 ; i<n ; i++){
+        if(!visited[i] and (min_vertex ==-1 or distance[i]<distance[min_vertex])){
+            min_vertex =  i ;
+        }
+    }
+    
+    return min_vertex ;
+}
+
+
+void dijkstra_algo(int **edges , int n){
+    
+    //intialize an dist array 
+    int* distance = new int[n] ;
+    bool *visited = new bool[n] ;
+    
+    for(int i =0 ;i<n ; i++){
+        distance[i] = INT_MAX ;
+        visited[i] = false ; 
+    }
+    // to set that root dist with root = 0 ;
+    distance[0] = 0 ;
+    for(int i = 0 ; i<n ; i++){
+        int min_vertex = findminvertex(distance,visited,n) ;
+        visited[min_vertex] = true ;
+        for(int j =0 ; j<n ;j++){
+            if(edges[min_vertex][j]!=0 and !visited[j]){
+                int dist = distance[min_vertex] + edges[min_vertex][j] ;
+                if(dist<distance[j]){
+                    distance[j] = dist ;
+                }
+            }
+        }
+        
+    }
+    
+    for(int i =0 ; i<n ;i++){
+        cout<<distance[i]<<" " ; // to print all distnace with root ;
+    }
+}
+
+
+int main()
+{
+    // no of nodes in tree ;
+    int n ; 
+  
+    int no_of_edges  ;
+  
+    cin>>n >> no_of_edges ;
+    
+    // to intialize two d matx witha all being 0 iitillly bfore vsisiting 
+  
+    int** edges = new int*[n] ;
+    for(int i = 0 ; i<n ; i++){
+        edges[i] = new int[n] ;
+        for(int j=0 ; j<n ;j++){
+            edges[i][j] = 0 ;
+            
+        }
+    }
+    
+    for(int i = 0 ;i<no_of_edges ;i++){
+        int node ;
+      
+        int nearby_node ;
+      
+        int dist_nearby ;
+      
+        cin>> node >> nearby_node>>dist_nearby ;
+        edges[node][nearby_node] = dist_nearby ;
+        edges[nearby_node][node] = dist_nearby ;
+        
+    }
+    
+    cout<<endl ;
+    dijkstra_algo(edges,n) ;
+
+    return 0;
+}
