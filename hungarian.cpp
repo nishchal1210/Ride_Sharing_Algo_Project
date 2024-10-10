@@ -36,10 +36,10 @@ struct Passenger {
     bool assigned;
 };
 
-// hungarian Algorithm for assignment
+   // hungarian Algorithm for assignment
 class HungarianAlgorithm {
 private:
-    int n; // number of drivers/passengers
+    int n;                 // number of drivers/passengers
     vector<vector<double>> costMatrix;
     vector<int> assigned;
 
@@ -51,13 +51,13 @@ public:
     }
 
     double minimizeCost() {
-        // vectors for labeling
+           // vectors for labeling
         vector<double> u(n, 0), v(n, 0);
         vector<int> p(n, -1), way(n, -1);
         vector<double> minv(n);
         vector<bool> used(n);
 
-        // main hungarian algorithm loop
+          // main hungarian algorithm loop
         for (int i = 0; i < n; ++i) {
             fill(minv.begin(), minv.end(), INF);
             fill(used.begin(), used.end(), false);
@@ -91,7 +91,7 @@ public:
                 j0 = j1;
             } while (p[j0] != -1);
             
-            // augmenting path
+                  // augmenting path
             do {
                 int j1 = way[j0];
                 p[j0] = p[j1];
@@ -111,14 +111,14 @@ public:
     }
 };
 
-// function to assign drivers to passengers
+      // function to assign drivers to passengers
 void assignDrivers(vector<Driver>& drivers, vector<Passenger>& passengers) {
     int n = min(drivers.size(), passengers.size());
 
-    // initialize hungarian algorithm for matching
+      // initialize hungarian algorithm for matching
     HungarianAlgorithm hungarian(n);
 
-    // set up the cost matrix (distance-based)
+      // set up the cost matrix (distance-based)
     for (int i = 0; i < n; ++i) {
         for (int j = 0; j < n; ++j) {
             double dist = drivers[i].location.distance(passengers[j].location);
@@ -126,18 +126,18 @@ void assignDrivers(vector<Driver>& drivers, vector<Passenger>& passengers) {
         }
     }
 
-    // minimize cost and get assignment
+      // minimize cost and get assignment
     hungarian.minimizeCost();
     vector<int> assigned = hungarian.getAssigned();
 
-    // output the assignment
+      // output the assignment
     for (int i = 0; i < n; ++i) {
         int passengerId = assigned[i];
         cout << "Driver " << drivers[i].id << " assigned to Passenger " << passengers[passengerId].id << endl;
     }
 }
 
-// main simulation loop
+  // main simulation loop
 void simulateRideSharing() {
     // examp. drivers and passengers
     vector<Driver> drivers = {
@@ -151,11 +151,11 @@ void simulateRideSharing() {
         {3, {3, 3}, {7, 7}, false}
     };
 
-    // assign drivers to passengers
+      // assign drivers to passengers
     assignDrivers(drivers, passengers);
 
-    // after assignment, drivers move towards their passengers destinations
-    // simulate real time updates, reassign if needed
+      // after assignment, drivers move towards their passengers destinations
+      // simulate real time updates, reassign if needed
 }
 
 int main() {
