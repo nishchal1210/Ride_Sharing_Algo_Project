@@ -1,87 +1,106 @@
 #include <iostream>
-using namespace std ;
-#define INT_MAX 1e9 
+#include <vector>
+using namespace std;
 
-int findminvertex(int* distance ,bool* visited , int n){
-  // initilizing with -1 ;
-    int min_vertex = -1 ;
-    for(int i =0 ; i<n ; i++){
-        if(!visited[i] and (min_vertex ==-1 or distance[i]<distance[min_vertex])){
-            min_vertex =  i ;
+#define INT_MAX 1e9
+
+int findMinVertex(int* distance, bool* visited, int n) {
+    int minVertex = -1;
+    for (int i = 0; i < n; i++) {
+        if (!visited[i] && (minVertex == -1 || distance[i] < distance[minVertex])) {
+            minVertex = i;
         }
     }
-    
-    return min_vertex ;
+    return minVertex;
 }
 
-
-void dijkstra_algo(int **edges , int n){
-    
-    //intialize an dist array 
-    int* distance = new int[n] ;
-    bool *visited = new bool[n] ;
-    
-    for(int i =0 ;i<n ; i++){
-        distance[i] = INT_MAX ;
-        visited[i] = false ; 
+void printPath(int* parent, int current) {
+    if (parent[current] == -1) {
+        cout << current; // root node reached
+        return;
     }
-    // to set that root dist with root = 0 ;
-    distance[0] = 0 ;
-    for(int i = 0 ; i<n ; i++){
-        int min_vertex = findminvertex(distance,visited,n) ;
-        visited[min_vertex] = true ;
-        for(int j =0 ; j<n ;j++){
-            if(edges[min_vertex][j]!=0 and !visited[j]){
-                int dist = distance[min_vertex] + edges[min_vertex][j] ;
-                if(dist<distance[j]){
-                    distance[j] = dist ;
+    printPath(parent, parent[current]);
+    cout << " -> " << current;
+}
+
+void dijkstra_algo(int** edges, int n, int destination) {
+    int* distance = new int[n];
+    bool* visited = new bool[n];
+    int* parent = new int[n]; // to store the parent of each node for path tracing
+
+    // Initialize distance, visited and parent arrays
+    for (int i = 0; i < n; i++) {
+        distance[i] = INT_MAX;
+        visited[i] = false;
+        parent[i] = -1; // No parent at the start
+    }
+
+    // Set root distance to 0
+    distance[0] = 0;
+
+    for (int i = 0; i < n; i++) {
+        int minVertex = findMinVertex(distance, visited, n);
+        visited[minVertex] = true;
+
+        for (int j = 0; j < n; j++) {
+            if (edges[minVertex][j] != 0 && !visited[j]) {
+                int dist = distance[minVertex] + edges[minVertex][j];
+                if (dist < distance[j]) {
+                    distance[j] = dist;
+                    parent[j] = minVertex; // Update parent for the path
                 }
             }
         }
-        
     }
-    
-    for(int i =0 ; i<n ;i++){
-        cout<<distance[i]<<" " ; // to print all distnace with root ;
-    }
+
+    // Print the shortest distance to the destination
+    cout << "Shortest distance from root to destination (" << destination << ") is: " << distance[destination] << endl;
+
+    // Print the path
+    cout << "Path: ";
+    printPath(parent, destination);
+    cout << endl;
+
+    // Clean up dynamic memory
+    delete[] distance;
+    delete[] visited;
+    delete[] parent;
 }
 
+int main() {
+    // Number of nodes and edges
+    int n, no_of_edges;
+    cin >> n >> no_of_edges;
 
-int main()
-{
-    // no of nodes in tree ;
-    int n ; 
-  
-    int no_of_edges  ;
-  
-    cin>>n >> no_of_edges ;
-    
-    // to intialize two d matx witha all being 0 iitillly bfore vsisiting 
-  
-    int** edges = new int*[n] ;
-    for(int i = 0 ; i<n ; i++){
-        edges[i] = new int[n] ;
-        for(int j=0 ; j<n ;j++){
-            edges[i][j] = 0 ;
-            
+    // Initialize adjacency matrix
+    int** edges = new int*[n];
+    for (int i = 0; i < n; i++) {
+        edges[i] = new int[n];
+        for (int j = 0; j < n; j++) {
+            edges[i][j] = 0;
         }
     }
-    
-    for(int i = 0 ;i<no_of_edges ;i++){
-        int node ;
-      
-        int nearby_node ;
-      
-        int dist_nearby ;
-      
-        cin>> node >> nearby_node>>dist_nearby ;
-        edges[node][nearby_node] = dist_nearby ;
-        edges[nearby_node][node] = dist_nearby ;
-        
+
+    // Read edges input
+    for (int i = 0; i < no_of_edges; i++) {
+        int node, nearby_node, dist_nearby;
+        cin >> node >> nearby_node >> dist_nearby;
+        edges[node][nearby_node] = dist_nearby;
+        edges[nearby_node][node] = dist_nearby;
     }
-    
-    cout<<endl ;
-    dijkstra_algo(edges,n) ;
+
+    // Input final destination node
+    int destination;
+    cin >> destination;
+
+    cout << endl;
+    dijkstra_algo(edges, n, destination);
+
+    // Clean up dynamic memory
+    for (int i = 0; i < n; i++) {
+        delete[] edges[i];
+    }
+    delete[] edges;
 
     return 0;
 }
