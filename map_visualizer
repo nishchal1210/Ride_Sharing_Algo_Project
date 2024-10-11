@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Graph Visualizer on Map</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+        }
+        #graph-container {
+            position: relative;
+            width: 800px;
+            height: 600px;
+            margin: 0 auto;
+        }
+        #graph {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+        }
+        #map {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            background-image: url("map-606538_1280.png"); /* Map image source */
+            background-size: cover;
+            opacity: 0.7;
+        }
+        button, input {
+            display: block;
+            margin: 10px auto;
+            padding: 10px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+        input {
+            width: 200px;
+            text-align: center;
+        }
+        #info {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background-color: white;
+            padding: 10px;
+            border: 1px solid #ddd;
+        }
+        #totalDistance {
+            font-weight: bold;
+            font-size: 16px;
+        }
+        text {
+            font-size: 14px;
+            font-weight: bold;
+        }
+        .highlighted {
+            font-weight: bold;
+            font-size: 16px;
+            fill: red;
+        }
+    </style>
+    <script src="https://d3js.org/d3.v6.min.js"></script>
+</head>
+<body>
+
+<h2 style="text-align: center;">Graph Visualizer with Map Background</h2>
+
+<div id="info">
+    <label for="start">Start Point:</label>
+    <input id="start" type="text" placeholder="Enter Start Node" value="A" />
+    
+    <label for="end">End Point:</label>
+    <input id="end" type="text" placeholder="Enter End Node" value="F" />
+    
+    <div id="totalDistance"></div>
+</div>
+
+<div id="graph-container">
+    <svg id="graph"></svg>
+    <div id="map"></div>
+</div>
+<button id="findShortestPath">Find Shortest Route</button>
+
+<script>
+    // Sample graph data (nodes and links)
+    const graphData = {
+        nodes: [
+            { id: 'A', x: 100, y: 100 }, { id: 'B', x: 200, y: 150 }, 
+            { id: 'C', x: 300, y: 100 }, { id: 'D', x: 400, y: 300 }, 
+            { id: 'E', x: 500, y: 150 }, { id: 'F', x: 600, y: 300 }
+        ],
+        links: [
+            { source: 'A', target: 'B', distance: 2 },
+            { source: 'A', target: 'C', distance: 4 },
+            { source: 'B', target: 'C', distance: 1 },
+            { source: 'B', target: 'D', distance: 7 },
+            { source: 'C', target: 'E', distance: 3 },
+            { source: 'E', target: 'F', distance: 2 },
+            { source: 'D', target: 'F', distance: 1 }
+        ]
+    };
+
+    // D3.js code for creating graph
+    const width = 800, height = 600;
+    const svg = d3.select("#graph")
+        .attr("width", width)
+        .attr("height", height);
+
+    const linkGroup = svg.append("g").attr("class", "links");
+    const nodeGroup = svg.append("g").attr("class", "nodes");
+
+    // Create links (lines)
+    const links = linkGroup.selectAll("line")
+        .data(graphData.links)
+        .enter()
+        .append("line")
+        .attr("stroke-width", 2)
+        .attr("stroke", "#999");
+
+    // Create nodes (circles)
+    const nodes = nodeGroup.selectAll("circle")
+        .data(graphData.nodes)
+        .enter()
+        .append("circle")
+        .attr("r", 15)
+        .attr("fill", "#69b3a2")
+        .call(d3.drag()
+            .on("start", dragstarted)
+            .on("drag", dragged)
+            .on("end", dragended));
+
+    // Labels for nodes
+    const labels = nodeGroup.selectAll("text")
+        .data(graphData.nodes)
+        .enter()
+        .append("text")
+        .attr("dy", -20)
+        .attr("dx", -10)
+        .text(d => d.id)
+        .attr("font-size", 14)
+        .attr("font-weight", "bold");
+
+    // Distance labels
+    const distanceLabels = linkGroup.selectAll("text")
+        .data(graphData.links)
+        .enter()
+        .append("text")
+        .attr("dy", -5)
+        .attr("text-anchor", "middle")
+        .text(d => d.distance)
+        .attr("font-size", 10)
+        .attr("fill", "black");
+
+    // Update positions on each tick
+    const simulation = d3.forceSimulation(graphData.nodes)
+        .force("link", d3.forceLink(graphData.links).id(d => d.id).distance(d => d.distance * 50))
+        .force("charge", d3.forceManyBody().strength(-300))
+        .force("center", d3.forceCenter(width / 2, height / 2))
+        .on("tick", () => {
+            links
+                .attr("x1", d => d.source.x)
+                .attr("y1", d => d.source.y)
+                .attr("x2", d => d.target.x)
+                .attr("y2", d => d.target.y);
+
+            nodes
+                .attr("cx", d => d.x)
+                .attr("cy", d => d.y);
+
+            labels
+                .attr("x", d => d.x)
+                .attr("y", d => d.y);
+
+            distanceLabels
+                .attr("x", d => (d.source.x + d.target.x) / 2)
+                .attr("y", d => (d.source.y + d.target.y) / 2);
+        });
+
+    // Drag event handlers
+    function dragstarted(event, d) {
+        d3.select(this).raise().classed("active", true);
+        d.x = d.x || Math.random() * width; // Set initial x position
+        d.y = d.y || Math.random() * height; // Set initial y position
+    }
+
+    function dragged(event, d) {
+        d.x = event.x;
+        d.y = event.y;
+        simulation.nodes().forEach(n => {
+            if (n.id === d.id) {
+                n.x = event.x;
+                n.y = event.y;
+            }
+        });
+        simulation.alpha(1).restart(); // Restart simulation
+    }
+
+    function dragended(event, d) {
+        d3.select(this).classed("active", false);
+    }
+
+    // Function to find the shortest path using Dijkstra's Algorithm
+    function findShortestPath() {
+        const distances = {};
+        const previous = {};
+        const unvisited = new Set();
+
+        graphData.nodes.forEach(node => {
+            distances[node.id] = Infinity;
+            unvisited.add(node.id);
+        });
+
+        const start = document.getElementById('start').value.toUpperCase(); // Get user input for start
+        const end = document.getElementById('end').value.toUpperCase(); // Get user input for end
+        distances[start] = 0;
+
+        while (unvisited.size) {
+            const closestNode = [...unvisited].reduce((a, b) => distances[a] < distances[b] ? a : b);
+            unvisited.delete(closestNode);
+
+            if (closestNode === end) break;
+
+            graphData.links.forEach(link => {
+                if (link.source.id === closestNode || link.target.id === closestNode) {
+                    const neighbor = link.source.id === closestNode ? link.target.id : link.source.id;
+                    if (unvisited.has(neighbor)) {
+                        const alt = distances[closestNode] + link.distance;
+                        if (alt < distances[neighbor]) {
+                            distances[neighbor] = alt;
+                            previous[neighbor] = closestNode;
+                        }
+                    }
+                }
+            });
+        }
+
+        const path = [];
+        let current = end;
+        while (current) {
+            path.unshift(current);
+            current = previous[current];
+        }
+
+        // Highlight the shortest path in the graph
+        links.attr("stroke", d => path.includes(d.source.id) && path.includes(d.target.id) ? "red" : "#999");
+        nodes.attr("fill", d => path.includes(d.id) ? "red" : "#69b3a2");
+        labels.attr("class", d => path.includes(d.id) ? "highlighted" : "");
+
+        // Display total distance
+        const totalDistance = distances[end];
+        document.getElementById('totalDistance').innerText = `Total Distance: ${totalDistance}`;
+    }
+
+    document.getElementById('findShortestPath').onclick = findShortestPath;
+
+</script>
+</body>
+</html>
