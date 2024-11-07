@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Enhanced Ride Scheduling Platform</title>
+    <link rel="stylesheet" href="styles.css">
+    <script src="https://apis.google.com/js/platform.js" async defer></script>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
+    <style>
+        /* Background Image */
+        body {
+            background-image: url('https://i.etsystatic.com/32661494/r/il/eae974/5129316416/il_600x600.5129316416_4gzo.jpg');
+            background-size: cover; /* Ensure the image covers the entire page */
+            background-position: center; /* Center the background image */
+            color: #fff; /* White text color for contrast */
+            font-family: Arial, sans-serif; /* Add a clean, modern font */
+        }
+
+        /* Header Styling */
+        header {
+            text-align: center;
+            padding: 20px;
+            background-color: rgba(0, 0, 0, 0.7); /* Semi-transparent background */
+            margin-bottom: 20px;
+        }
+
+        header h1 {
+            margin: 0;
+            font-size: 3rem;
+        }
+
+        /* Main Content Styling */
+        main {
+            padding: 20px;
+            background-color: rgba(0, 0, 0, 0.5); /* Semi-transparent background for readability */
+            border-radius: 10px;
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        /* Sign-Up Section */
+        #auth-section {
+            margin-bottom: 30px;
+        }
+
+        #sign-up-container {
+            background-color: rgba(0, 0, 0, 0.6);
+            padding: 20px;
+            border-radius: 10px;
+        }
+
+        #signup-form input {
+            margin: 10px 0;
+            padding: 10px;
+            width: 100%;
+            border: none;
+            border-radius: 5px;
+            font-size: 1rem;
+        }
+
+        #signup-form button {
+            padding: 10px 20px;
+            background-color: #ff6600;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            color: white;
+            font-size: 1rem;
+        }
+
+        #oauth-button {
+            margin-top: 20px;
+            text-align: center;
+        }
+
+        /* Ride Scheduling Section */
+        #ride-scheduling-section {
+            display: none;
+        }
+
+        #ride-form label,
+        #ride-form input,
+        #ride-form button {
+            display: block;
+            width: 100%;
+            margin: 10px 0;
+        }
+
+        #ride-form input,
+        #ride-form button {
+            padding: 10px;
+            font-size: 1rem;
+            border-radius: 5px;
+            border: none;
+        }
+
+        #ride-form button {
+            background-color: #28a745;
+            color: white;
+            cursor: pointer;
+        }
+
+        /* Map Container Styling */
+        #map-container {
+            margin-top: 30px;
+            position: relative;
+        }
+
+        #map {
+            width: 100%;
+            height: 400px;
+            border-radius: 10px;
+        }
+
+        #rider-info-box {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            background-color: rgba(0, 0, 0, 0.7);
+            color: white;
+            padding: 10px;
+            border-radius: 10px;
+        }
+
+        /* Footer Styling */
+        footer {
+            text-align: center;
+            padding: 20px;
+            background-color: rgba(0, 0, 0, 0.7);
+            color: #fff;
+        }
+    </style>
+</head>
+
+<body>
+    <header>
+        <h1>Enhanced Ride Scheduler</h1>
+    </header>
+
+    <main>
+        <div id="auth-section">
+            <div id="sign-up-container">
+                <h2>Sign Up / Log In</h2>
+                <form id="signup-form">
+                    <label for="username">Username:</label>
+                    <input type="text" id="username" name="username" required><br>
+
+                    <label for="password">Password:</label>
+                    <input type="password" id="password" name="password" required><br>
+
+                    <button type="submit">Sign Up / Log In</button>
+                </form>
+                <div id="oauth-button">
+                    <h3>Or log in with:</h3>
+                    <div class="g-signin2" data-onsuccess="onSignIn"></div>
+                </div>
+            </div>
+        </div>
+
+        <div id="ride-scheduling-section" style="display: none;">
+            <h2>Schedule Your Ride</h2>
+            <form id="ride-form">
+                <label for="start-location">Start Location:</label>
+                <input type="text" id="start-location" name="start-location" required><br>
+
+                <label for="destination">Destination:</label>
+                <input type="text" id="destination" name="destination" required><br>
+
+                <label for="ride-date">Date & Time:</label>
+                <input type="datetime-local" id="ride-date" name="ride-date" required><br>
+
+                <button type="submit">Find Riders</button>
+            </form>
+
+            <div id="map-container">
+                <div id="map"></div>
+                <div id="rider-info-box">
+                    <h3>Rider Info</h3>
+                    <div id="rider-info"></div>
+                </div>
+            </div>
+
+            <div id="ride-details-tab" style="display: none;">
+                <h3>Scheduled Ride Details</h3>
+                <div id="ride-details-container"></div>
+            </div>
+        </div>
+    </main>
+
+    <footer>
+        <p>&copy; 2024 Enhanced Ride Scheduler</p>
+    </footer>
+
+    <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+    <script src="script.js"></script>
+</body>
+
+</html>
