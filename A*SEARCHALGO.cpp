@@ -9,6 +9,69 @@ struct cell{
    int parent_j;
    double f,g,h;
 };
+//priority queue implemented as a min heap to find out minimum f value from 2 nodes in less time i.e. is logn
+class PriorityQueue{
+private:
+   vector<pair<double,Pair>> heap;
+   //function to maintain condition of min heap i.e.every node should be less than or equal to its descendent
+   void heapifyup(int index){
+    while(index>0&&heap[(index-1)/2].first>heap[index].first){
+        swap(heap[index],heap[(index-1)/2]);
+        index=(index-1)/2;
+
+    }
+   }
+   //function to maintain heap property when an element is removed
+   /*when an element is deleted the bottom element is shifted at top so min-heap condition is violated hence 
+   be restored so we use this function
+   */
+   void heapifydown(int index){
+    int smallest=index;
+    int left=2*index+1;
+    int right=2*index+2;
+    if(left<heap.size()&&heap[left].first<heap[smallest].first){
+        smallest=left;
+    }
+    if(right<heap.size()&&heap[index].first>heap[right].first){
+        smallest=right;
+    }
+    if(smallest!=index){
+        swap(heap[index],heap[smallest]);
+        heapifydown(smallest);
+    }
+
+   }
+public:
+//function to push cost value and coordinates of cell into heap
+   void push(pair<double,Pair> val){
+    heap.push_back(val);
+    heapifyup(heap.size()-1);
+   }
+   //function to remove the pair of cost value and coordinates of cell from min heap
+   void pop(){
+    heap[0]=heap.back();
+    heap.pop_back();
+    heapifydown(0);
+
+   }
+   //fucntiom to view the top element i.e. min element of heap
+   pair<double,Pair>> top(){
+    if(!heap.empty()) return heap[0];
+    return {FLT_MAX,{-1,-1}};//return invalid if empty
+
+
+   }
+   //function to check if heap is empty or not
+   bool empty(){
+    if(heap.empty()) return true;
+    return false;
+   }
+
+
+
+   
+
+};
 class ASTARSEARCHALGORITHM{
 public:
    int ROW,COL;
@@ -121,17 +184,23 @@ public:
     celldetails[i][j].f=0;
     celldetails[i][j].g=0;
     celldetails[i][j].h=0;
-    //creating an open list that contains cells for evaluation
-    //uses set data structure of pair type containg f value and coordinates
-    set<pPair> openlist;
+    /*creating an open list that contains cells for evaluation
+    contains cells that are candidates for evaluation 
+    cell with least f value will be selected 
+    each cell has maximum 8 neighbours that can be evaluated 
+    */
+   //priority queue is used to implement openlist i.e. min-heap as it hepls to find element in logn time
+   PriorityQueue openlist;
+    
+    
     //put the source cell on open list and initialise its f as zero
-    openlist.insert(make_pair(0.0,make_pair(i,j)));
+    openlist.push({0,{i,j}});
     //variable is defined to check if final destination is reached or not
     bool found_dest=false;
     while(!openlist.empty()){
-        pPair p=*openlist.begin();
+        auto p=openlist.top();
         //removing this coordinate
-        openlist.erase(openlist.begin());
+        openlist.pop();
         i=p.second.first;
         j=p.second.second;
         //cell is under evalaution so change its bool value in closed list
@@ -177,7 +246,7 @@ public:
             //compare f value and fnew
             if(celldetails[i][j+1].f==FLT_MAX||celldetails[i][j+1].f>fnew){
                 //inserting to open list
-                openlist.insert(make_pair(fnew,make_pair(i,j+1)));
+                openlist.push(make_pair(fnew,make_pair(i,j+1)));
                  //update its details
                 celldetails[i][j+1].g=gnew;
                 celldetails[i][j+1].h=hnew;
@@ -236,7 +305,7 @@ public:
             hnew=calculatehvalue(i-1,j,dest);
             fnew=gnew+hnew;
             if(celldetails[i-1][j].f==FLT_MAX||celldetails[i-1][j].f>fnew){
-                openlist.insert(make_pair(fnew,make_pair(i-1,j)));
+                openlist.push(make_pair(fnew,make_pair(i-1,j)));
                 celldetails[i-1][j].g=gnew;
                 celldetails[i-1][j].h=hnew;
                 celldetails[i-1][j].f=fnew;
@@ -263,7 +332,7 @@ public:
             hnew=calculatehvalue(i+1,j,dest);
             fnew=gnew+hnew;
             if(celldetails[i+1][j].f==FLT_MAX||celldetails[i+1][j].f>fnew){
-                openlist.insert(make_pair(fnew,make_pair(i+1,j)));
+                openlist.push(make_pair(fnew,make_pair(i+1,j)));
                 celldetails[i+1][j].g=gnew;
                 celldetails[i+1][j].h=hnew;
                 celldetails[i+1][j].f=fnew;
@@ -289,7 +358,7 @@ public:
             hnew=calculatehvalue(i-1,j-1,dest);
             fnew=gnew+hnew;
             if(celldetails[i-1][j-1].f==FLT_MAX||celldetails[i-1][j-1].f>fnew){
-                openlist.insert(make_pair(fnew,make_pair(i-1,j-1)));
+                openlist.push(make_pair(fnew,make_pair(i-1,j-1)));
                 celldetails[i-1][j-1].g=gnew;
                 celldetails[i-1][j-1].h=hnew;
                 celldetails[i-1][j-1].f=fnew;
@@ -314,7 +383,7 @@ public:
             hnew=calculatehvalue(i-1,j+1,dest);
             fnew=gnew+hnew;
             if(celldetails[i-1][j+1].f==FLT_MAX||celldetails[i-1][j+1].f>fnew){
-                openlist.insert(make_pair(fnew,make_pair(i-1,j+1)));
+                openlist.push(make_pair(fnew,make_pair(i-1,j+1)));
                 celldetails[i-1][j+1].g=gnew;
                 celldetails[i-1][j+1].h=hnew;
                 celldetails[i-1][j+1].f=fnew;
@@ -341,7 +410,7 @@ public:
             hnew=calculatehvalue(i+1,j+1,dest);
             fnew=gnew+hnew;
             if(celldetails[i+1][j+1].f==FLT_MAX||celldetails[i+1][j+1].f>fnew){
-                openlist.insert(make_pair(fnew,make_pair(i+1,j+1)));
+                openlist.push(make_pair(fnew,make_pair(i+1,j+1)));
                 celldetails[i+1][j+1].g=gnew;
                 celldetails[i+1][j+1].h=hnew;
                 celldetails[i+1][j+1].f=fnew;
@@ -366,7 +435,7 @@ public:
             hnew=calculatehvalue(i+1,j-1,dest);
             fnew=gnew+hnew;
             if(celldetails[i+1][j-1].f==FLT_MAX||celldetails[i+1][j-1].f>fnew){
-                openlist.insert(make_pair(fnew,make_pair(i+1,j+1)));
+                openlist.push(make_pair(fnew,make_pair(i+1,j+1)));
                 celldetails[i+1][j-1].g=gnew;
                 celldetails[i+1][j-1].h=hnew;
                 celldetails[i+1][j-1].f=fnew;
@@ -419,6 +488,7 @@ int main(){
     ASTARSEARCHALGORITHM X(ROW,COL);
 
     X.implement_a_star_search(grid,src,dest);
+
     return 0;
     
 
