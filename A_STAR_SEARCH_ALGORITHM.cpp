@@ -63,13 +63,11 @@ public:
    }
    //function to check if heap is empty or not
    bool empty(){
+    
     if(heap.empty()) return true;
     return false;
    }
 
-
-
-   
 
 };
 class ASTARSEARCHALGORITHM{
@@ -370,7 +368,9 @@ public:
        
        }
        //6th successor-(i-1,j+1)
+
        if(isvalid(i-1,j+1)){
+        
         if(isdestination(i-1,j+1,dest)){
             celldetails[i-1][j+1].parent_i=i;
             celldetails[i-1][j+1].parent_j=j;
