@@ -370,7 +370,7 @@ public:
        //6th successor-(i-1,j+1)
 
        if(isvalid(i-1,j+1)){
-        
+
         if(isdestination(i-1,j+1,dest)){
             celldetails[i-1][j+1].parent_i=i;
             celldetails[i-1][j+1].parent_j=j;
@@ -390,7 +390,6 @@ public:
                 celldetails[i-1][j+1].f=fnew;
                 celldetails[i-1][j+1].parent_i=i;
                 celldetails[i-1][j+1].parent_j=j;
-
 
             }
         }
