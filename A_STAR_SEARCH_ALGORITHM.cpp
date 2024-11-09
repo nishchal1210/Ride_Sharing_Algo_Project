@@ -160,6 +160,7 @@ public:
     //create a closed list to keep track which cells have been evalauted
     //list is intialised to false meaning no cell has been evalauted
     //it is of bool type
+
     //closed list hepls to avoid cells that have been already evaluated 
     //improves effficiency
     vector<vector<bool>> closedlist(ROW,vector<bool>(COL,false));
@@ -466,7 +467,7 @@ public:
    
 
 };
-
+//main function
 int main(){
     int ROW,COL;
     cin>>ROW;
