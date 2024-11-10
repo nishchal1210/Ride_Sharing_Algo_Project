@@ -18,7 +18,7 @@ The A* algorithm finds the shortest path by maintaining an `f` score for each ce
   - `g` is the exact cost from the start cell to the current cell.
   - `h` is the heuristic estimate from the current cell to the destination.
 
-The algorithm explores nodes with the lowest `f` score, optimizing the search towards the destination and achieving the shortest path.
+The algorithm explores nodes with the lowest `f` score, optimizing the search towards the destination and achieving the shortest path. The overall algorithm works in linear complexity at its best. 
 
 ### How A* Search Works
 - **Initialization** : Start with the initial node in the priority queue with f(n)=g(n)+h(n).
