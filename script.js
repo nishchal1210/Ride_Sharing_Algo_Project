@@ -18,162 +18,119 @@ document.addEventListener("DOMContentLoaded", () => {
     // Handle ride scheduling form submission
     rideForm.addEventListener("submit", (event) => {
         event.preventDefault();
-        const startLocation = { name: "Start", lat: 26.9124, lng: 75.7873 };
-        const goalLocation = { name: "Destination", lat: 26.9500, lng: 75.8250 };
+        const startLocation = document.getElementById("start-location").value;
+        const destination = document.getElementById("destination").value;
+        const rideDate = document.getElementById("ride-date").value;
 
-        // Generate 100 random locations for demonstration
-        const locations = generateRandomLocations(startLocation, goalLocation, 100);
+        // Dummy locations (in a real app, use geocoding services)
+        const locations = [
+            { name: "Start", lat: 26.9124, lng: 75.7873, rider: "Rider 1", color: "red" },
+            { name: "Intermediate Point A", lat: 26.9250, lng: 75.8000, rider: "Rider 2", color: "blue" },
+            { name: "Intermediate Point B", lat: 26.9390, lng: 75.8100, rider: "Rider 3", color: "green" },
+            { name: "Destination", lat: 26.9500, lng: 75.8250 }
+        ];
 
-        // Find the shortest path using A* algorithm with a threshold distance to change riders
-        const thresholdDistance = 10; // Distance threshold to change riders
-        const path = findShortestPathAStar(startLocation, goalLocation, locations, thresholdDistance);
-
-        if (path.length > 0) {
-            plotPathOnMap(path);
-            sendRideDetailsEmail(path);
-        } else {
-            alert("No path found between the locations.");
+        // Clear existing markers and polylines only if map is initialized
+        if (map) {
+            map.eachLayer((layer) => {
+                if (layer instanceof L.Marker || layer instanceof L.Polyline) {
+                    map.removeLayer(layer);
+                }
+            });
         }
+
+        // Plot points and paths with different colors
+        const riderInfoDiv = document.getElementById("rider-info");
+        riderInfoDiv.innerHTML = ""; // Clear previous info
+        for (let i = 0; i < locations.length - 1; i++) {
+            const start = locations[i];
+            const end = locations[i + 1];
+
+            // Add markers
+            L.marker([start.lat, start.lng]).addTo(map).bindPopup(`${start.name} (Start)`).openPopup();
+            L.marker([end.lat, end.lng]).addTo(map).bindPopup(`${end.name} (End)`);
+
+            // Draw polyline
+            L.polyline([[start.lat, start.lng], [end.lat, end.lng]], {
+                color: start.color,
+                weight: 5
+            }).addTo(map);
+
+            // Add rider info box
+            riderInfoDiv.innerHTML += `<p style="color:${start.color};"><strong>${start.rider}:</strong> Path from ${start.name} to ${end.name}</p>`;
+        }
+
+        // Open a new window for the ride details
+        openRideDetailsInNewWindow(locations);
     });
 
     // Initialize the map centered on Jaipur
     function initMap() {
+        if (map) {
+            return; // If map is already initialized, do nothing
+        }
+
         map = L.map('map').setView([26.9124, 75.7873], 13);
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
             attribution: '&copy; OpenStreetMap contributors'
         }).addTo(map);
     }
 
-    // Generate random locations around a base point
-    function generateRandomLocations(start, goal, count) {
-        const locations = [start];
-        for (let i = 1; i <= count; i++) {
-            const latOffset = (Math.random() - 0.5) * 0.1;
-            const lngOffset = (Math.random() - 0.5) * 0.1;
-            locations.push({
-                name: `Location ${i}`,
-                lat: start.lat + latOffset,
-                lng: start.lng + lngOffset,
-                rider: `Rider ${i % 10}`,
-                color: getRandomColor()
-            });
-        }
-        locations.push(goal);
-        return locations;
-    }
+    // Open a new window and display detailed ride information
+    function openRideDetailsInNewWindow(locations) {
+        const newWindow = window.open("", "Ride Details", "width=600,height=400");
+        
+        // Add HTML content to the new window
+        newWindow.document.write(`
+            <html>
+                <head>
+                    <title>Ride Details</title>
+                    <style>
+                        body { font-family: Arial, sans-serif; padding: 20px; }
+                        h2 { color: #4CAF50; }
+                        p { font-size: 16px; }
+                        hr { margin: 20px 0; }
+                    </style>
+                </head>
+                <body>
+                    <h2>Ride Details</h2>
+                    <div id="ride-details-container"></div>
+                    <script>
+                        // Ride details content for the new window
+                        const locations = ${JSON.stringify(locations)};
+                        const avgSpeed = 40; // Assumed average speed in km/h
+                        let totalFare = 0;
+                        let totalDistance = 0;
+                        const rideDetailsContainer = document.getElementById('ride-details-container');
+                        
+                        locations.forEach((location, index) => {
+                            if (index < locations.length - 1) {
+                                const distance = (Math.random() * 5 + 1); // Randomized distance between 1-5 km (for demo purposes)
+                                const fare = distance * 10; // Example fare calculation
+                                totalFare += fare;
+                                totalDistance += distance;
 
-    // Utility to generate a random color
-    function getRandomColor() {
-        const letters = '0123456789ABCDEF';
-        let color = '#';
-        for (let i = 0; i < 6; i++) {
-            color += letters[Math.floor(Math.random() * 16)];
-        }
-        return color;
-    }
+                                rideDetailsContainer.innerHTML += \`
+                                    <p>
+                                        <strong>Rider:</strong> \${location.rider}<br>
+                                        <strong>Distance:</strong> \${distance.toFixed(2)} km<br>
+                                        <strong>Estimated Time:</strong> \${(distance / avgSpeed * 60).toFixed(2)} minutes<br>
+                                        <strong>Fare:</strong> ₹\${fare.toFixed(2)}
+                                    </p>
+                                \`;
+                            }
+                        });
 
-    // A* algorithm to find the shortest path with rider switching
-    function findShortestPathAStar(start, goal, locations, thresholdDistance) {
-        let openSet = [start];
-        let cameFrom = {};
-        let gScore = {};
-        let fScore = {};
-        let totalDistanceTravelled = 0;
-        let currentRider = start.rider || "Rider 1";
+                        rideDetailsContainer.innerHTML += \`
+                            <hr>
+                            <p><strong>Total Distance:</strong> \${totalDistance.toFixed(2)} km</p>
+                            <p><strong>Total Fare:</strong> ₹\${totalFare.toFixed(2)}</p>
+                        \`;
+                    </script>
+                </body>
+            </html>
+        `);
 
-        locations.forEach(location => {
-            gScore[location.name] = Infinity;
-            fScore[location.name] = Infinity;
-        });
-        gScore[start.name] = 0;
-        fScore[start.name] = heuristic(start, goal);
-
-        while (openSet.length > 0) {
-            let current = openSet.reduce((lowest, node) => {
-                return fScore[node.name] < fScore[lowest.name] ? node : lowest;
-            });
-
-            if (current.name === goal.name) {
-                return reconstructPath(cameFrom, current);
-            }
-
-            openSet = openSet.filter(node => node !== current);
-
-            locations.forEach(neighbor => {
-                if (neighbor === current) return;
-                let tentative_gScore = gScore[current.name] + distance(current, neighbor);
-                if (tentative_gScore < gScore[neighbor.name]) {
-                    cameFrom[neighbor.name] = current;
-                    gScore[neighbor.name] = tentative_gScore;
-                    fScore[neighbor.name] = tentative_gScore + heuristic(neighbor, goal);
-                    if (!openSet.includes(neighbor)) {
-                        openSet.push(neighbor);
-                    }
-                }
-            });
-
-            totalDistanceTravelled += distance(current, locations.find(loc => loc.name === cameFrom[current.name]?.name));
-            if (totalDistanceTravelled >= thresholdDistance) {
-                currentRider = `Rider ${Math.floor(Math.random() * 10) + 1}`;
-                totalDistanceTravelled = 0;
-            }
-            current.rider = currentRider;
-        }
-
-        return [];
-    }
-
-    // Calculate the heuristic (Euclidean distance)
-    function heuristic(a, b) {
-        const dx = b.lat - a.lat;
-        const dy = b.lng - a.lng;
-        return Math.sqrt(dx * dx + dy * dy);
-    }
-
-    // Calculate the Euclidean distance
-    function distance(a, b) {
-        const dx = b.lat - a.lat;
-        const dy = b.lng - a.lng;
-        return Math.sqrt(dx * dx + dy * dy);
-    }
-
-    // Reconstruct the path
-    function reconstructPath(cameFrom, current) {
-        let totalPath = [current];
-        while (cameFrom[current.name]) {
-            current = cameFrom[current.name];
-            totalPath.push(current);
-        }
-        return totalPath.reverse();
-    }
-
-    // Plot path on the map
-    function plotPathOnMap(path) {
-        map.eachLayer((layer) => {
-            if (layer instanceof L.Marker || layer instanceof L.Polyline) {
-                map.removeLayer(layer);
-            }
-        });
-
-        path.forEach((location, index) => {
-            L.marker([location.lat, location.lng]).addTo(map).bindPopup(`Step ${index + 1}: ${location.name}`);
-        });
-
-        for (let i = 0; i < path.length - 1; i++) {
-            L.polyline([[path[i].lat, path[i].lng], [path[i + 1].lat, path[i + 1].lng]], {
-                color: path[i].color || 'blue',
-                weight: 5
-            }).addTo(map);
-        }
-    }
-
-    // Send ride details via email (dummy function)
-    function sendRideDetailsEmail(path) {
-        const email = document.getElementById("email").value;
-        let rideDetails = "Your ride details:\\n";
-        path.forEach((location, index) => {
-            rideDetails += `Step ${index + 1}: ${location.name} (Rider: ${location.rider})\\n`;
-        });
-        alert(`Ride details sent to ${email}:\\n${rideDetails}`);
+        newWindow.document.close(); // Close the document to render content properly
     }
 });
