@@ -1,7 +1,7 @@
 # OptiRide : An Optimized Ride Scheduler
 
 ## Overview
-**OptiRide** is a modern day optimized ride scheduler. The idea behind this was to design an algorithm for real-time ride- scheduling that efficiently matches passengers with drivers by minimizing waiting times and travel distances, while dynamically adapting to new requests and driver status updates. The main tasks of the project include schedule rides from one point to another accounting the intermediate locations and minimizing the cost of transport. C++, HTML, CSS & Javascript are the languages used. 
+**OptiRide** is a modern day optimized ride scheduler. The idea behind this was to design an algorithm for real-time ride- scheduling that efficiently matches passengers with drivers by minimizing waiting times and travel distances, while dynamically adapting to new requests and driver status updates. The main tasks of the project include schedule rides from one point to another accounting the intermediate locations and minimizing the cost of transport. C++, Python, HTML, CSS & Javascript are the languages used. 
 
 ## Code Structure
 - **main.cpp** : Contains the implementation of the A* algorithm and a sample grid setup.
