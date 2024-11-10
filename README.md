@@ -1,7 +1,7 @@
 # OptiRide : An Optimized Ride Scheduler
 
 ## Overview
-**OptiRide** is a modern day optimized ride scheduler 
+**OptiRide** is a modern day optimized ride scheduler. The idea behind this was to design an algorithm for real-time ride- scheduling that efficiently matches passengers with drivers by minimizing waiting times and travel distances, while dynamically adapting to new requests and driver status updates. The main tasks of the project include schedule rides from one point to another accounting the intermediate locations and minimizing the cost of transport. C++, HTML, CSS & Javascript are the languages used. 
 
 ## Code Structure
 - **main.cpp** : Contains the implementation of the A* algorithm and a sample grid setup.
@@ -20,6 +20,12 @@ The A* algorithm finds the shortest path by maintaining an `f` score for each ce
 
 The algorithm explores nodes with the lowest `f` score, optimizing the search towards the destination and achieving the shortest path.
 
+### How A* Search Works
+- **Initialization** : Start with the initial node in the priority queue with f(n)=g(n)+h(n).
+- **Node Expansion** : Extract the node with the lowest f(n) value. If it’s the goal node, the search ends.
+- **Neighbor Evaluation** : For each neighbor of the current node, compute the tentative g(n). If it offers a better path, update g(n) and f(n), then add it to the queue.
+- **Repeat** : Continue expanding nodes until the goal is reached or the queue is empty.
+
 ### Features
 - **2D Grid Environment**: Represents the map as a grid, where each cell can be walkable or blocked.
 - **Priority-Based Node Expansion**: Uses a min-heap priority queue to select the cell with the minimum estimated cost to the goal.
@@ -35,12 +41,9 @@ The algorithm explores nodes with the lowest `f` score, optimizing the search to
 5. **Path Stack**: A `stack<Pair>` to trace the path back from the destination to the source.
 
 ## Directions to Run the Code 
-- Follow the given protocols in correct order :-
-- 1. 
+- Clone the Project
+- Make sure that you have a local editor platform
+- Navigate to `index.html` file. 
+- Run the project by setting up a live server on local editor
 
-## Usage
-
-### Requirements
-- C++ compiler (GCC, Clang, or Visual Studio)
-- Standard C++ library support
-
+## THANK YOU! 
